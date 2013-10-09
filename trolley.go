@@ -114,8 +114,11 @@ func init () {
         typ := r[:d]
         arg := r[d+3:]
         switch typ {
-            case "udp": go vita.ReceiveUdp(arg, 1048576, dec, handle)
-            default:    log.Fatal("Unkown receiver type: ", typ)
+        case "udp":
+            _, e := vita.ReceiveUdp(arg, 1048576, dec, handle, vita.ErrorLogger)
+            if e != nil { log.Fatal(e) }
+        default:
+            log.Fatal("Unkown receiver type: ", typ)
         }
     }
 }
@@ -126,7 +129,7 @@ func init () {
 
 func init () {
     for {
-        e := vita.SendUdp(":1234", &babel.MsgBin{&babel.IdBin{babel.NIL}, &babel.UnicodeBin{"Ohai world!"}})
+        e := vita.Send(&babel.IdBin{babel.NIL}, &babel.UnicodeBin{"Ohai world!"})
         if e != nil { log.Println("Warning: ", e) }
         time.Sleep(time.Second)
     }

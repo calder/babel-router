@@ -12,6 +12,6 @@
   "pipeServers": [
   ],
   "receivers": [
-    "udp://:1234"
+    "udp://:8124"
   ]
 }
