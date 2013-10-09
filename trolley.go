@@ -11,12 +11,6 @@ import "github.com/calder/fiddle"
 import "github.com/calder/vita"
 import "labix.org/v2/mgo"
 
-/********************
-***   Constants   ***
-********************/
-
-const MAXLENGTH = 1024
-
 /*****************
 ***   Config   ***
 *****************/
@@ -120,7 +114,7 @@ func init () {
         typ := r[:d]
         arg := r[d+3:]
         switch typ {
-            case "udp": go vita.ReceiveUdp(arg, 1024, dec, handle)
+            case "udp": go vita.ReceiveUdp(arg, 1048576, dec, handle)
             default:    log.Fatal("Unkown receiver type: ", typ)
         }
     }
@@ -132,7 +126,7 @@ func init () {
 
 func init () {
     for {
-        e := vita.SendUdp(&babel.MsgBin{&babel.IdBin{babel.NIL}, &babel.UnicodeBin{"Ohai world!"}})
+        e := vita.SendUdp(":1234", &babel.MsgBin{&babel.IdBin{babel.NIL}, &babel.UnicodeBin{"Ohai world!"}})
         if e != nil { log.Println("Warning: ", e) }
         time.Sleep(time.Second)
     }
