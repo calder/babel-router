@@ -1,0 +1,17 @@
+{
+  "ids": {
+    "ED8528C5D0D3385CD4916A01A27FEA45A638F24B726EBEA70A7690F52EDB989A": {
+      "type":"plain"
+    }
+  },
+  "db": {
+    "name": "vita"
+  },
+  "pipes": {
+  },
+  "pipeServers": [
+  ],
+  "receivers": [
+    "udp://:1234"
+  ]
+}

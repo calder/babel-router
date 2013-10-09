@@ -1,0 +1,22 @@
+{
+  "ids": {
+    "DE451859B1CFACFCA2D9454C5DA9E116F3364858573DBD80BB1F4CCC374E8950": {
+      "type":"plain"
+    }
+  },
+  "db": {
+    "name": "vita-client"
+  },
+  "pipes": {
+    "ED8528C5D0D3385CD4916A01A27FEA45A638F24B726EBEA70A7690F52EDB989A": [
+      "udp://:1234"
+    ]
+  },
+  "pipeServers": [
+    "ED8528C5D0D3385CD4916A01A27FEA45A638F24B726EBEA70A7690F52EDB989A"
+  ],
+  "keyServers": [
+  ],
+  "receivers": [
+  ]
+}
