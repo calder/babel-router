@@ -75,16 +75,6 @@ func init () {
     db.C("messages").EnsureIndex(mgo.Index{Key:[]string{"to"}})
 }
 
-/******************
-***   Decoder   ***
-******************/
-
-var dec *babel.Decoder
-
-func init () {
-    dec = babel.NewDecoder()
-}
-
 /****************
 ***   Pipes   ***
 ****************/
@@ -112,7 +102,7 @@ func newPipe (id string, pipe string) {
     var msg Message
     for msgs.Next(&msg) {
         fun := pipes[id][pipe]
-        fun(dec.DecodeBytes(msg.Content))
+        fun(babel.DecodeBytes(msg.Content))
     }
 }
 
@@ -148,7 +138,7 @@ func init () {
         arg := r[d+3:]
         switch typ {
         case "udp":
-            _, e := vita.ReceiveUdp(arg, 1048576, dec, handle, vita.ErrorLogger)
+            _, e := vita.ReceiveUdp(arg, 1048576, handle, vita.ErrorLogger)
             if e != nil { log.Fatal(e) }
         default:
             log.Fatal("Unkown receiver type: ", typ)
