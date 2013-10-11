@@ -8,7 +8,6 @@ import "strings"
 import "time"
 import "github.com/calder/babel"
 import "github.com/calder/fiddle"
-import "github.com/calder/vita"
 import "labix.org/v2/mgo"
 import "labix.org/v2/mgo/bson"
 
@@ -79,7 +78,7 @@ func init () {
 ***   Pipes   ***
 ****************/
 
-type Pipe func(babel.Bin)
+type Pipe func(babel.Any)
 
 func newPipe (id string, pipe string) {
     // Parse pipe string
@@ -92,7 +91,7 @@ func newPipe (id string, pipe string) {
     switch typ {
     case "udp":
         if pipes[id] == nil { pipes[id] = make(map[string]Pipe) }
-        pipes[id][pipe] = func (bin babel.Bin) { vita.SendUdp(arg, bin) }
+        pipes[id][pipe] = func (pkt babel.Any) { babel.SendUdp(arg, pkt) }
     default:
         log.Fatal("Unkown pipe type: ", typ)
     }
@@ -102,11 +101,13 @@ func newPipe (id string, pipe string) {
     var msg Message
     for msgs.Next(&msg) {
         fun := pipes[id][pipe]
-        fun(babel.DecodeBytes(msg.Content))
+        pkt, e := babel.DecodeBytes(msg.Content)
+        if e != nil { log.Println("Warning: ", e); continue }
+        fun(pkt)
     }
 }
 
-func pipeMessage (to *babel.IdBin, msg babel.Bin) {
+func pipeMessage (to *babel.Id, msg babel.Any) {
     id := to.Dat.RawHex()
     for pipe := range pipes[id] {
         fun := pipes[id][pipe]
@@ -138,7 +139,7 @@ func init () {
         arg := r[d+3:]
         switch typ {
         case "udp":
-            _, e := vita.ReceiveUdp(arg, 1048576, handle, vita.ErrorLogger)
+            _, e := babel.ReceiveUdp(arg, 1048576, handle, babel.ErrorLogger)
             if e != nil { log.Fatal(e) }
         default:
             log.Fatal("Unkown receiver type: ", typ)
@@ -150,41 +151,26 @@ func init () {
 ***   Packet Handler   ***
 *************************/
 
-func handle (bin babel.Bin) {
-    switch bin.(type) {
-    case *babel.UdpSubBin:
-        handleUdpSub(bin.(*babel.UdpSubBin))
-    case *babel.MsgBin:
-        handleMsg(bin.(*babel.MsgBin))
+func handle (pkt babel.Any) {
+    switch pkt.(type) {
+    case *babel.UdpSub:
+        handleUdpSub(pkt.(*babel.UdpSub))
+    case *babel.Message:
+        handleMessage(pkt.(*babel.Message))
     default:
         log.Println("    Discarded: unkown packet type")
     }
 }
 
-func handleUdpSub (sub *babel.UdpSubBin) {
-    switch sub.Id.(type) {
-    case *babel.IdBin:
-        id := sub.Id.(*babel.IdBin).Dat.RawHex()
-        switch sub.Addr.(type) {
-        case *babel.UdpAddrStrBin:
-            addr := sub.Addr.(*babel.UdpAddrStrBin).Dat
-            newPipe(id, "udp://"+addr)
-        default:
-            log.Println("    Discarded: unkown UDP address type")
-        }
-    default:
-        log.Println("    Discarded: unkown ID type")
-    }
+func handleUdpSub (sub *babel.UdpSub) {
+    id := sub.Id.Dat.RawHex()
+    addr := sub.Addr.Dat
+    newPipe(id, "udp://"+addr)
 }
 
-func handleMsg (msg *babel.MsgBin) {
-    switch msg.To.(type) {
-    case *babel.IdBin:
-        storeMessage(msg.To.(*babel.IdBin).Dat, msg.Dat.Encode())
-        pipeMessage(msg.To.(*babel.IdBin), msg.Dat)
-    default:
-        log.Println("    Discarded: unkown recipient type")
-    }
+func handleMessage (msg *babel.Message) {
+    storeMessage(msg.To.Dat, babel.EncodeUnsafe(msg.Dat))
+    pipeMessage(msg.To, msg.Dat)
 }
 
 /**************************
@@ -193,7 +179,7 @@ func handleMsg (msg *babel.MsgBin) {
 
 func init () {
     // for {
-    //     e := vita.Send(&babel.IdBin{babel.NIL}, &babel.UnicodeBin{"Ohai world!"})
+    //     e := babel.Send(&babel.Id{babel.NIL}, &babel.Unicode{"Ohai world!"})
     //     if e != nil { log.Println("Warning: ", e) }
     //     time.Sleep(time.Second)
     // }
