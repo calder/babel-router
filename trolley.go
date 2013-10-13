@@ -43,13 +43,12 @@ func init () {
 *******************/
 
 type Message struct {
-    Date    time.Time
+    Date    *time.Time
     To      []byte
     Content []byte
 }
 
-func storeMessage (to *fiddle.Bits, dat *fiddle.Bits) {
-    msg := &Message{time.Now(), to.RawBytes(), dat.Bytes()}
+func storeMessage (msg *Message) {
     db.C("messages").Insert(msg)
 }
 
@@ -91,7 +90,10 @@ func newPipe (id string, pipe string) {
     switch typ {
     case "udp":
         if pipes[id] == nil { pipes[id] = make(map[string]Pipe) }
-        pipes[id][pipe] = func (pkt babel.Any) { babel.SendUdp(arg, pkt) }
+        pipes[id][pipe] = func (pkt babel.Any) {
+            log.Println("Sent:", pkt)
+            babel.SendUdp(arg, pkt)
+        }
     default:
         log.Fatal("Unkown pipe type: ", typ)
     }
@@ -107,11 +109,11 @@ func newPipe (id string, pipe string) {
     }
 }
 
-func pipeMessage (to *babel.Id, msg babel.Any) {
+func pipeMessage (to *babel.Id, dat *fiddle.Bits) {
     id := to.Dat.RawHex()
     for pipe := range pipes[id] {
         fun := pipes[id][pipe]
-        fun(msg)
+        fun(dat)
     }
 }
 
@@ -151,26 +153,48 @@ func init () {
 ***   Packet Handler   ***
 *************************/
 
+type Context struct {
+    Date    *time.Time
+    To      *babel.Id
+    Content *fiddle.Bits
+}
+
 func handle (pkt babel.Any) {
+    log.Println("Received:", pkt)
+    peel(pkt, &Context{})
+}
+
+func peel (pkt babel.Any, c *Context) {
     switch pkt.(type) {
     case *babel.UdpSub:
-        handleUdpSub(pkt.(*babel.UdpSub))
+        peelUdpSub(pkt.(*babel.UdpSub), c)
     case *babel.Message:
-        handleMessage(pkt.(*babel.Message))
+        peelMessage(pkt.(*babel.Message), c)
     default:
         log.Println("    Discarded: unkown packet type")
     }
 }
 
-func handleUdpSub (sub *babel.UdpSub) {
+func peelUdpSub (sub *babel.UdpSub, c *Context) {
     id := sub.Id.Dat.RawHex()
     addr := sub.Addr.Dat
     newPipe(id, "udp://"+addr)
 }
 
-func handleMessage (msg *babel.Message) {
-    storeMessage(msg.To.Dat, babel.EncodeUnsafe(msg.Dat))
-    pipeMessage(msg.To, msg.Dat)
+func peelMessage (msg *babel.Message, c *Context) {
+    c.To = msg.To
+    c.Content = msg.Dat
+    send(c)
+}
+
+func send (c *Context) {
+    msg := &Message{
+        Date:    c.Date,
+        To:      c.To.Dat.RawBytes(),
+        Content: c.Content.Bytes(),
+    }
+    storeMessage(msg)
+    pipeMessage(c.To, c.Content)
 }
 
 /**************************

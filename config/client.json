@@ -18,5 +18,6 @@
   "keyServers": [
   ],
   "receivers": [
-  ]
+  ],
+  "keychain": true
 }
