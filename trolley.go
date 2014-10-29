@@ -1,42 +1,12 @@
 package main
 
-import "encoding/json"
-import "io/ioutil"
 import "log"
-import "os"
 import "strings"
 import "time"
-import "github.com/calder/babel"
+import "github.com/calder/babel-encoding-go"
 import "github.com/calder/fiddle"
-import "labix.org/v2/mgo"
-import "labix.org/v2/mgo/bson"
-
-/*****************
-***   Config   ***
-*****************/
-
-type Config struct {
-    Ids         map[string]map[string]string
-    Db          map[string]string
-    Pipes       map[string][]string
-    PipeServers []string
-    Receivers   []string
-}
-
-var conf *Config
-
-func init () {
-    // Check arguments
-    if len(os.Args) != 2 { log.Fatal("Usage: trolley CONFIGFILE") }
-
-    // Read config file
-    f, e := ioutil.ReadFile(os.Args[1])
-    if e != nil { log.Fatal("Error reading config file: ", e) }
-
-    // Parse config file
-    e = json.Unmarshal(f, &conf)
-    if e != nil { log.Fatal("Configuration error: ", e) }
-}
+import "gopkg.in/mgo.v2"
+import "gopkg.in/mgo.v2/bson"
 
 /*******************
 ***   Database   ***
@@ -109,7 +79,7 @@ func newPipe (id string, pipe string) {
     }
 }
 
-func pipeMessage (to *babel.Id, dat *fiddle.Bits) {
+func pipeMessage (to *babel.Id1, dat *fiddle.Bits) {
     id := to.Dat.RawHex()
     for pipe := range pipes[id] {
         fun := pipes[id][pipe]
@@ -155,7 +125,7 @@ func init () {
 
 type Context struct {
     Date    *time.Time
-    To      *babel.Id
+    To      *babel.Id1
     Content *fiddle.Bits
 }
 
@@ -176,7 +146,7 @@ func peel (pkt babel.Any, c *Context) {
 }
 
 func peelUdpSub (sub *babel.UdpSub, c *Context) {
-    id := sub.Id.Dat.RawHex()
+    id := sub.Id1.Dat.RawHex()
     addr := sub.Addr.Dat
     newPipe(id, "udp://"+addr)
 }
@@ -203,7 +173,7 @@ func send (c *Context) {
 
 func init () {
     // for {
-    //     e := babel.Send(&babel.Id{babel.NIL}, &babel.Unicode{"Ohai world!"})
+    //     e := babel.Send(&babel.Id1{babel.NIL}, &babel.Unicode{"Ohai world!"})
     //     if e != nil { log.Println("Warning: ", e) }
     //     time.Sleep(time.Second)
     // }
@@ -212,6 +182,10 @@ func init () {
 /***************
 ***   Main   ***
 ***************/
+
+func init () {
+    loadConfig()
+}
 
 func main () {
     select{}
