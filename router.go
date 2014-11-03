@@ -1,8 +1,5 @@
 package main
 
-// import "log"
-// import "strings"
-// import "time"
 // import "github.com/calder/babel-lib-go"
 
 type Router struct {

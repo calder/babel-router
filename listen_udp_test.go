@@ -23,7 +23,7 @@ func sendUdp (addrStr string, msg []byte) error {
     conn, e := net.DialUDP("udp", nil, addr)
     if e != nil { return e }
 
-    // Send the packet
+    // Send message
     n, e := conn.Write(msg)
     if e != nil { return e }
     if n < len(msg) { return errors.New("incomplete send") }
@@ -32,7 +32,7 @@ func sendUdp (addrStr string, msg []byte) error {
 
 func TestListenUdp (T *testing.T) {
     router := NewRouter()
-    go router.ListenUdp(":8124")
+    go router.ListenUdp(8124)
 
     msg := []byte{1,2,3,4,5}
     sendUdp("localhost:8124", msg)
