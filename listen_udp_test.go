@@ -31,14 +31,14 @@ func sendUdp (addrStr string, msg []byte) error {
 }
 
 func TestListenUdp (T *testing.T) {
-    router := NewRouter()
-    go router.ListenUdp(8124)
+    router := newTestRouter()
+    go router.listenUdp(8124)
 
     msg := []byte{1,2,3,4,5}
     sendUdp("localhost:8124", msg)
 
     select {
-    case received := <- router.Queue:
+    case received := <- router.queue:
         if !bytes.Equal(received, msg) {
             T.Log("Error:   ", "received message != sent message")
             T.Log("Sent:    ", hex.EncodeToString(msg))

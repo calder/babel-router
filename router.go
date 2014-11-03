@@ -1,11 +1,15 @@
 package main
 
-// import "github.com/calder/babel-lib-go"
-
 type Router struct {
-    Queue chan []byte
+    queue chan []byte
 }
 
 func NewRouter () *Router {
+    router := &Router{make(chan []byte)}
+    go router.processQueue()
+    return router
+}
+
+func newTestRouter () *Router {
     return &Router{make(chan []byte)}
 }

@@ -7,7 +7,7 @@ import "strconv"
 const maxPacketSize = 1024 * 1024
 
 // Listen for UDP packets on the given port and add them to the router's queue.
-func (r *Router) ListenUdp (port int) {
+func (r *Router) listenUdp (port int) {
     addr, e := net.ResolveUDPAddr("udp", ":"+strconv.Itoa(port))
     if e != nil { panic(e) }
     conn, e := net.ListenUDP("udp", addr)
@@ -20,6 +20,7 @@ func (r *Router) ListenUdp (port int) {
 
         msg := make([]byte, n)
         copy(msg, buffer[:n])
-        r.Queue <- msg
+
+        r.queue <- msg
     }
 }
