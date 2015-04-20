@@ -1,6 +1,5 @@
 package main
 
-import "log"
 import "net"
 import "strconv"
 
@@ -16,7 +15,7 @@ func (r *Router) listenUdp (port int) {
     buffer := make([]byte, maxPacketSize)
     for {
         n, e := conn.Read(buffer)
-        if e != nil { log.Println("UDP read error:", e.Error()); continue }
+        if e != nil { log.Debug("UDP read error:", e.Error()); continue }
 
         msg := make([]byte, n)
         copy(msg, buffer[:n])

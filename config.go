@@ -2,7 +2,6 @@ package main
 
 import "encoding/json"
 import "io/ioutil"
-import "log"
 import "os"
 
 /*****************
