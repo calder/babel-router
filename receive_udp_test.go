@@ -6,15 +6,7 @@ import "errors"
 import "net"
 import "testing"
 import "time"
-
-func Timeout (timeout time.Duration) chan bool {
-    channel := make(chan bool)
-    go func () {
-        time.Sleep(timeout)
-        channel <- true
-    }()
-    return channel
-}
+import "github.com/calder/go-timeout"
 
 func sendUdp (addrStr string, msg []byte) error {
     // Create UDP connection
@@ -31,8 +23,10 @@ func sendUdp (addrStr string, msg []byte) error {
 }
 
 func TestListenUdp (T *testing.T) {
+    log.Info("starting test")
+
     router := newTestRouter()
-    go router.listenUdp(8124)
+    go router.receiveUdp(8124)
 
     msg := []byte{1,2,3,4,5}
     sendUdp("localhost:8124", msg)
@@ -45,7 +39,7 @@ func TestListenUdp (T *testing.T) {
             T.Log("Received:", hex.EncodeToString(received))
             T.FailNow()
         }
-    case <-Timeout(100 * time.Millisecond):
+    case <-timeout.Timeout(100 * time.Millisecond):
         T.Log("Error:", "timed out waiting for message")
         T.FailNow()
     }

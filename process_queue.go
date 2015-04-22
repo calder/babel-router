@@ -7,7 +7,7 @@ import "github.com/calder/babel-lib-go"
 var BLOB = babel.Type("01")
 
 type Context struct {
-    dest *babel.Id1
+    dest *babel.Hash1
 }
 
 func (r *Router) handleBlob (data []byte, c *Context) {
@@ -20,7 +20,7 @@ func (r *Router) handleEnvelope (data []byte, c *Context) {
     if e != nil { log.Debug("error decoding envelope: %s", e); return }
     destType, destData, _, e := babel.Unwrap(babel.TYPE, env.dest)
     if destType != babel.ID1 { log.Debug("unknown destination type: %x", destType); return }
-    dest, e := babel.DecodeId1(destData)
+    dest, e := babel.DecodeHash1(destData)
     if e != nil { log.Debug("error decoding destination: %s", e); return }
     c.dest = dest
     r.handleMessage(env.msg, c)

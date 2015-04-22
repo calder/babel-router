@@ -3,24 +3,17 @@ package main
 import "testing"
 import "time"
 import "github.com/calder/babel-lib-go"
+import "github.com/calder/go-timeout"
 
-func TestProcessQueueDecodesMessage (T *testing.T) {
-    // testDecoderCalled := make(chan bool)
-    // testType := babel.Type("CDE9C47D")
-    // testDecoder := func (bytes []byte) (res babel.Value, err error) {
-    //     testDecoderCalled <- true
-    //     return babel.NewInt32(123), nil
-    // }
-    // babel.AddType(testType, testDecoder)
+func TestProcessQueueForwardsMessage (T *testing.T) {
+    log.Info("starting test")
 
     router := NewRouter()
-    // router.queue <- testType.Encode(babel.TYPE)
+    // TODO: attach distributer to the router
     router.queue <- babel.Wrap(babel.TYPE, BLOB, []byte{1,2,3,4,5})
 
     select {
-    // case <-testDecoderCalled:
-    case <-Timeout(100 * time.Millisecond):
-        // T.Log("Error:", "custom type decoder never called")
-        // T.FailNow()
+    // TODO: get message from the test distributer
+    case <-timeout.Timeout(100 * time.Millisecond):
     }
 }
