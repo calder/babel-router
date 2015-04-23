@@ -20,6 +20,6 @@ func (r *Router) receiveUdp (port int) {
         msg := make([]byte, n)
         copy(msg, buffer[:n])
 
-        r.queue <- msg
+        r.enqueue(msg)
     }
 }

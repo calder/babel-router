@@ -3,11 +3,11 @@ package main
 import "net"
 import "testing"
 
-func TestDistributeTcp (T *testing.T) {
+func TestSendTcp (T *testing.T) {
     log.Info("starting test")
 
     router := NewRouter()
-    go router.distributeTcp(8125)
+    go router.sendTcp(8125)
 
     // Create TCP connection
     _, e := net.Dial("tcp", "localhost:8125")

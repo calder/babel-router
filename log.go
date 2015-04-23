@@ -1,7 +1,17 @@
 package main
 
+import "encoding/hex"
 import "os"
+import "strings"
 import "github.com/op/go-logging"
+
+func Hex (bytes []byte) string {
+    return strings.ToUpper(hex.EncodeToString(bytes))
+}
+
+func SHex (s string) string {
+    return Hex([]byte(s))
+}
 
 var log = logging.MustGetLogger("index")
 

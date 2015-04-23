@@ -9,8 +9,10 @@ func TestProcessQueueForwardsMessage (T *testing.T) {
     log.Info("starting test")
 
     router := NewRouter()
-    // TODO: attach distributer to the router
-    router.queue <- babel.Wrap(babel.TYPE, BLOB, []byte{1,2,3,4,5})
+
+    dest := babel.Hash1OfData([]byte{1,2,3,4,5})
+    blob := NewBlob([]byte{6,7,8,9,10})
+    router.enqueue(EnvelopeFromValues(dest, blob).CBR())
 
     select {
     // TODO: get message from the test distributer

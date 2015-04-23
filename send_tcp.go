@@ -19,7 +19,7 @@ func handleConnection (conn net.Conn) {
     }
 }
 
-func (r *Router) distributeTcp (port int) {
+func (r *Router) sendTcp (port int) {
     ln, e := net.Listen("tcp", ":" + strconv.Itoa(port))
     if e != nil { panic(e) }
 
