@@ -3,6 +3,7 @@ package main
 import "encoding/hex"
 import "os"
 import "strings"
+import "code.google.com/p/goprotobuf/proto"
 import "github.com/op/go-logging"
 
 func Hex (bytes []byte) string {
@@ -11,6 +12,10 @@ func Hex (bytes []byte) string {
 
 func SHex (s string) string {
     return Hex([]byte(s))
+}
+
+func THex (typ uint64) string {
+    return Hex(proto.EncodeVarint(typ))
 }
 
 var log = logging.MustGetLogger("index")

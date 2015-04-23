@@ -7,13 +7,12 @@ type Message struct {
 }
 
 func (r *Router) handleBlob (data []byte, m *Message) {
-    blob, e := DecodeBlob(data)
-    if e != nil { log.Debug("error decoding blob: %s", e); return }
+    blob := DecodeBlob(data)
     log.Debug("got %s", blob)
 
     if m.dest == nil { log.Debug("message has no recipient"); return }
 
-    e = r.addToSendQueue(string(m.dest.CBR()), blob.Data())
+    e := r.addToSendQueue(m.dest.CBR(), blob.Data())
     if e != nil { log.Debug("error sending message: %s", e); return }
 }
 

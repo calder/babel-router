@@ -23,29 +23,29 @@ func (r *Router) enqueue (msg []byte) {
     r.queue <- msg
 }
 
-func (r *Router) hasSendQueue (s string) bool {
-    _, ok := r.sendQueues[s]
+func (r *Router) hasSendQueue (dest []byte) bool {
+    _, ok := r.sendQueues[string(dest)]
     return ok
 }
 
-func (r *Router) openSendQueue (s string) MsgQueue {
-    if _, ok := r.sendQueues[s]; ok {
-        log.Debug("send queue already open for %s", SHex(s))
+func (r *Router) openSendQueue (dest []byte) MsgQueue {
+    if _, ok := r.sendQueues[string(dest)]; ok {
+        log.Debug("send queue already open for %s", Hex(dest))
         return nil
     }
 
     q := make(MsgQueue)
-    r.sendQueues[s] = q
+    r.sendQueues[string(dest)] = q
     return q
 }
 
-func (r *Router) closeSendQueue (s string) {
-    delete(r.sendQueues, s)
+func (r *Router) closeSendQueue (dest []byte) {
+    delete(r.sendQueues, string(dest))
 }
 
-func (r *Router) addToSendQueue (dest string, msg []byte) error {
-    if q, ok := r.sendQueues[dest]; !ok {
-        return errors.New("destination not connected: " + SHex(dest))
+func (r *Router) addToSendQueue (dest []byte, msg []byte) error {
+    if q, ok := r.sendQueues[string(dest)]; !ok {
+        return errors.New("destination not connected: " + Hex(dest))
     } else {
         q <- msg
         return nil

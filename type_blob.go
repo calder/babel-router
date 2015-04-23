@@ -1,5 +1,6 @@
 package main
 
+import "bytes"
 import "encoding/hex"
 import "github.com/calder/babel-lib-go"
 
@@ -36,7 +37,11 @@ func (b *Blob) Encode (enc babel.Encoding) []byte {
     return babel.Wrap(enc, BLOB, b.data)
 }
 
-func decodeBlob (data []byte) (babel.Value, error) { return DecodeBlob(data) }
-func DecodeBlob (data []byte) (*Blob, error) {
-    return &Blob{data}, nil
+func decodeBlob (data []byte) (babel.Value, error) { return DecodeBlob(data), nil }
+func DecodeBlob (data []byte) *Blob {
+    return &Blob{data}
+}
+
+func (b *Blob) Equal (other *Blob) bool {
+    return bytes.Equal(b.data, other.data)
 }
