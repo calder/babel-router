@@ -20,19 +20,6 @@ func TestProcessQueueForwardsMessage (T *testing.T) {
 
     select {
     case received := <-recipient:
-        // typ, data, _, e := babel.Unwrap(babel.TYPE, received)
-        // if e != nil {
-        //     T.Log("Error:", "error decoding message")
-        //     T.Log("Receieved:", received)
-        //     T.Log("Original: ", blob.CBR())
-        //     T.FailNow()
-        // }
-        // if typ != BLOB {
-        //     T.Log("Error:", "received message type != BLOB")
-        //     T.Log("Type: ", THex(typ))
-        //     T.Log("BLOB: ", THex(BLOB))
-        //     T.FailNow()
-        // }
         blob2 := DecodeBlob(received)
         if !blob2.Equal(blob) {
             T.Log("Error:    ", "received blob != sent blob")
